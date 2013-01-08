@@ -24,7 +24,7 @@ class StringParsing
   
   def parse_request_line_reg(line)
     begin
-      if line.length>0
+      if !line.empty?
         pattern = /GET\s+\/\S*\s+HTTP\/\d.\d/
         request_line = line.split(" ");
         @method = request_line[0];
