@@ -1,69 +1,49 @@
+require './http400_error'
 class StringParsing
   def parse_request_line(line)
-    @method_list = ["OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "CONNECT"]
-    if line.length>0
-      p1 = line.split(" ")[0];
-      p2 = line.split(" ")[1];
-      p3 = line.split(" ")[2];
-      
-      if @method_list.include?(p1.upcase)
-        @method = p1
-      else
-        puts :status => 400
-        return
-      end
-      
-      if p2.length>0
-        if (p2.length==1 && (p2=="*" || p2=="/")) || (p2.length>1 && p2.split("")[0]=="/") || (p2.length>7 && p2[0,7].downcase=="http://")
-          @path = p2;
-        else
-          puts :status => 400
-          return
-        end
-      else
-        puts :status => 400
-        return
-      end
-      
-      if p3.length>0
-        if p3.split("/")[0].downcase=="http" && p3.split("/")[1]=="1.1"
-          @version = p3.split("/")[1]
-        else
-          puts :status => 400
-          return
-        end
-      else
-        puts :status => 400
-        return
-      end
-      
-      puts :method => :"#{@method.upcase}", :path => @path, :version => @version
-      return
-    else
-      puts :text => "Empty Request Line", :status => 400
-      return
+    begin
+       if !line.empty?
+         request_line = line.split(" ");
+         @method = request_line[0];
+         @path = request_line[1];
+         @version = request_line[2];
+
+         if @method.upcase=="GET" && @path.start_with?("/") && @version.upcase=="HTTP/1.1"
+           return :method => :"#{@method.upcase}", :path => @path, :version => @version.split("/")[1]
+         else
+           raise Http400Error
+         end
+       else
+         raise Http400Error
+       end
+       
+     rescue Http400Error => e
+       return e.message
     end
   end
   
   def parse_request_line_reg(line)
-    if line.length>0
-      pattern = /(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT)\s+\S+\s+HTTP\/\d.\d/
-      if (pattern).match(line)
-        @method = line.split(" ")[0];
-        @path = line.split(" ")[1];
-        @version = line.split(" ")[2].split("/")[1];
-        puts :method => :"#{@method.upcase}", :path => @path, :version => @version
-        return
+    begin
+      if line.length>0
+        pattern = /GET\s+\/\S*\s+HTTP\/\d.\d/
+        request_line = line.split(" ");
+        @method = request_line[0];
+        @path = request_line[1];
+        @version = request_line[2];
+        if (pattern).match(line)
+          return :method => :"#{@method.upcase}", :path => @path, :version => @version.split("/")[1]
+        else
+          raise Http400Error
+        end
       else
-        puts :status => 400
-        return
+        raise Http400Error
       end
-      
-      return
-    else
-      puts :text => "Empty Request Line", :status => 400
-      return
+    
+    rescue Http400Error => e
+       return e.message
     end
   end
 
 end
+
+# StringParsing.new.parse_request_line("GE / HTTP/1.1")
