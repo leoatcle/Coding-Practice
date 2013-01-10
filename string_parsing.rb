@@ -7,7 +7,8 @@ class StringParsing
          # @method = request_line[0];
          # @path = request_line[1];
          # @version = request_line[2];
-         # the assignment below is better to handle array overflow
+         
+         # the assignment below is better
          @method, @path, @version = line.split(" ")
 
          if @method.upcase=="GET" && @path.start_with?("/") && @version.upcase=="HTTP/1.1"
@@ -45,4 +46,4 @@ class StringParsing
 
 end
 
-puts StringParsing.new.parse_request_line("GE / HTTP/1.1")
+puts StringParsing.new.parse_request_line("GET / HTTP/1.1")
