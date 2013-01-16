@@ -1,12 +1,10 @@
 require 'socket'
 
 begin
-  print "Please enter the desired port number: "
-  input = gets.chomp
-  port = /\d/.match(input)? input.to_i : 4000
-  server = TCPServer.new(port)
+  server = TCPServer.new(ARGV[1])
 rescue 
-  retry
+  puts "Invalid Argument."
+  return
 end
 
 begin
