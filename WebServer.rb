@@ -1,9 +1,13 @@
 require 'socket'
 
 begin
+  unless ARGV.length==2 && ARGV[0]==="-p"
+    puts "Invalid Argument."
+    exit
+  end
   server = TCPServer.new(ARGV[1])
-rescue 
-  puts "Invalid Argument."
+rescue => e
+  puts e.message
   return
 end
 
@@ -29,7 +33,7 @@ begin
   end
 rescue => e
   puts e.message
-  server = TCPServer.new(port)
+  server = TCPServer.new(ARGV[1])
   retry
 end
 
